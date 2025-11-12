@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Queries DNS for specific subdomains and displays record type and destination
+
+query_dns() {
+    domain=$1
+    sub=$2
+    full_domain="${sub}.${domain}"
+    
+    # Query DNS and format output using awk
+    dig "$full_domain" | grep -A1 'ANSWER SECTION:' | tail -n1 | awk -v s="$sub" '{ printf "The subdomain %s is a %s record and points to %s\n", s, $4, $5 }'
+}
+
+if [ "$#" -eq 2 ]; then
+    # If specific subdomain provided
+    query_dns "$1" "$2"
+else
+    # If no subdomain provided, check the defaults
+    query_dns "$1" "www"
+    query_dns "$1" "lb-01"
+    query_dns "$1" "web-01"
+    query_dns "$1" "web-02"
+fi
